@@ -106,15 +106,30 @@ class RegisterService(BaseTaskService[RegisterTask]):
     def _register_one(self, domain: Optional[str], task: RegisterTask) -> dict:
         """注册单个账户"""
         log_cb = lambda level, message: self._append_log(task, level, message)
-        client = DuckMailClient(
-            base_url=config.basic.duckmail_base_url,
-            proxy=config.basic.proxy,
-            verify_ssl=config.basic.duckmail_verify_ssl,
-            api_key=config.basic.duckmail_api_key,
-            log_callback=log_cb,
-        )
+
+        # 根据配置选择邮件提供商
+        temp_mail_provider = (config.basic.temp_mail_provider or "duckmail").lower()
+
+        if temp_mail_provider == "moemail":
+            from core.moemail_client import MoemailClient
+            client = MoemailClient(
+                base_url=config.basic.moemail_base_url,
+                proxy=config.basic.proxy,
+                api_key=config.basic.moemail_api_key,
+                domain=domain or config.basic.moemail_domain,
+                log_callback=log_cb,
+            )
+        else:
+            client = DuckMailClient(
+                base_url=config.basic.duckmail_base_url,
+                proxy=config.basic.proxy,
+                verify_ssl=config.basic.duckmail_verify_ssl,
+                api_key=config.basic.duckmail_api_key,
+                log_callback=log_cb,
+            )
+
         if not client.register_account(domain=domain):
-            return {"success": False, "error": "duckmail register failed"}
+            return {"success": False, "error": f"{temp_mail_provider} register failed"}
 
         # 根据配置选择浏览器引擎
         browser_engine = (config.basic.browser_engine or "dp").lower()
@@ -154,7 +169,7 @@ class RegisterService(BaseTaskService[RegisterTask]):
             return {"success": False, "error": result.get("error", "automation failed")}
 
         config_data = result["config"]
-        config_data["mail_provider"] = "duckmail"
+        config_data["mail_provider"] = temp_mail_provider
         config_data["mail_address"] = client.email
         config_data["mail_password"] = client.password
 
