@@ -310,6 +310,32 @@ curl http://localhost:7860/v1/chat/completions \
 
 ---
 
+## 🔄 独立刷新服务
+
+如果需要将账号刷新服务单独部署（与主 API 分离），可使用 [`refresh-worker` 分支](https://github.com/Dreamy-rain/gemini-business2api/tree/refresh-worker)：
+
+```bash
+git clone -b refresh-worker https://github.com/Dreamy-rain/gemini-business2api.git gemini-refresh-worker
+cd gemini-refresh-worker
+cp .env.example .env
+# 编辑 .env 设置 DATABASE_URL
+docker-compose up -d
+```
+
+该服务从数据库读取账号，独立执行定时刷新，支持 cron 调度、分批执行、冷却防重复。适合需要刷新服务与 API 服务分离部署的场景。
+
+---
+
+## 🌐 Socks5 免费代理池
+
+自动注册/刷新账号时可配置代理以提高成功率。推荐使用免费 Socks5 代理池：
+
+- **项目地址**：[github.com/Dreamy-rain/socks5-proxy](https://github.com/Dreamy-rain/socks5-proxy)
+- **说明**：免费代理不太稳定，但能一定程度提高注册成功率
+- **使用方式**：在管理面板 → 系统设置 → 代理设置中配置
+
+---
+
 ## 📸 功能展示
 
 ### 管理系统

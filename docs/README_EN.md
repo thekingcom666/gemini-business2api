@@ -308,6 +308,32 @@ In addition to local Docker Compose, these platforms support Docker image deploy
 
 ---
 
+## 🔄 Standalone Refresh Service
+
+To deploy the account refresh service separately from the main API, use the [`refresh-worker` branch](https://github.com/Dreamy-rain/gemini-business2api/tree/refresh-worker):
+
+```bash
+git clone -b refresh-worker https://github.com/Dreamy-rain/gemini-business2api.git gemini-refresh-worker
+cd gemini-refresh-worker
+cp .env.example .env
+# Edit .env to set DATABASE_URL
+docker-compose up -d
+```
+
+This service reads accounts from the database and runs scheduled credential refresh independently. Supports cron scheduling, batch processing, and cooldown deduplication.
+
+---
+
+## 🌐 Socks5 Free Proxy Pool
+
+Configure a proxy when auto-registering/refreshing accounts to improve success rates:
+
+- **Project**: [github.com/Dreamy-rain/socks5-proxy](https://github.com/Dreamy-rain/socks5-proxy)
+- **Note**: Free proxies are not very stable, but can help improve registration success rates
+- **Usage**: Configure in Admin Panel → System Settings → Proxy Settings
+
+---
+
 ## 📸 Screenshots
 
 ### Admin System
